@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RadioProtect Herbs Compound Filter System</title>
+    <link href="./web_database_files/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./web_database_files/all.min.css">
+    <link rel="stylesheet" href="./web_database_files/fonts.css">
+    
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --dark-bg: #343a40;
+            --text-color: #333;
+            --text-light: #6c757d;
+            --paper-color: #f9f7f1;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            color: var(--text-color);
+            background-color: var(--paper-color);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Lora', serif;
+            font-weight: 600;
+        }
+
+        .navbar {
+            background-color: var(--primary-color);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+            padding: 0.75rem 0;
+        }
+        .navbar-brand {
+            font-family: 'Lora', serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white;
+        }
+        .navbar-brand:hover { color: #f8f9fa; }
+
+        .nav-link, .dropdown-item { font-weight: 500; transition: all 0.2s; }
+        .nav-link:hover, .dropdown-item:hover { background-color: rgba(255,255,255,0.1); }
+
+        .page {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 2rem;
+            margin: 1.5rem auto;
+            max-width: 1400px;
+            border: 1px solid var(--border-color);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+            padding: 1rem 1.25rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-primary:hover {
+            background-color: #233140;
+            border-color: #233140;
+        }
+
+        .photo-tooltip {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            cursor: pointer;
+        }
+        .photo-tooltip:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+        .info-layer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+            color: white;
+            padding: 1.5rem;
+            transform: translateY(100%);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .photo-tooltip:hover .info-layer {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .scientific-name {
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        .description {
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .database-features {
+            padding: 2rem;
+            background-color: white;
+            border-radius: 12px;
+            margin-bottom: 3rem;
+        }
+        .section-title {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+        .feature-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            height: 100%;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            background-color: #f8f9fa;
+        }
+        .card-icon { text-align: center; margin-bottom: 1.2rem; color: var(--secondary-color); }
+        .card-title { font-size: 1.25rem; font-weight: 600; text-align: center; margin-bottom: 0.8rem; }
+        .card-text { font-size: 0.95rem; text-align: center; }
+
+        .academic-content { font-family: 'Lora', serif; line-height: 1.8; color: #444; }
+        .footer {
+            background-color: var(--primary-color);
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2rem;
+            width: 100%;
+        }
+        .footer a { color: #ffd966; text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+
+        @media (max-width: 768px) {
+            .page { padding: 1.5rem; }
+            .feature-card { padding: 1rem; }
+            .card-title { font-size: 1.1rem; }
+            .navbar-brand { font-size: 1.2rem; }
+        }
+        @media (max-width: 576px) {
+            .info-layer { padding: 0.8rem; }
+            .scientific-name { font-size: 0.9rem; }
+            .description { font-size: 0.75rem; }
+        }
+    </style>
+    <script src="./web_database_files/jquery-3.7.1.min.js"></script>
+    <script src="./web_database_files/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand">Mengxiang Research Group</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto"></ul>
+            <div class="d-flex">
+                <button class="btn btn-outline-light btn-sm me-2" data-bs-toggle="modal" data-bs-target="#updateModal">News Updates</button>
+                <button class="btn btn-outline-light btn-sm me-2" onclick="location.href='mailto:jiahuama@swust.edu.cn'">Contact Us</button>
+                <div class="dropdown me-2">
+                    <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">Links</button>
+                    <ul class="dropdown-menu">
+                        <li><h6 class="dropdown-header">Institutions</h6></li>
+                        <li><a class="dropdown-item" href="https://www.swust.edu.cn/" target="_blank">Southwest University of Science and Technology</a></li>
+                        <li><a class="dropdown-item" href="https://www.caep.cn/" target="_blank">China Academy of Engineering physics</a></li>
+                        <li><a class="dropdown-item" href="https://www.suda.edu.cn/" target="_blank">Soochow University</a></li>
+                        <li><a class="dropdown-item" href="https://fyxy.suda.edu.cn/" target="_blank">Soochow University: State Key Laboratory of Radiation Medicine</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><h6 class="dropdown-header">Databases</h6></li>
+                        <li><a class="dropdown-item" href="https://www.genome.jp/kegg/" target="_blank">KEGG</a></li>
+                        <li><a class="dropdown-item" href="http://geneontology.org/" target="_blank">Gene Ontology (GO)</a></li>
+                        <li><a class="dropdown-item" href="https://www.ncbi.nlm.nih.gov/" target="_blank">NCBI</a></li>
+                        <li><a class="dropdown-item" href="https://radbiodb.physics.ntua.gr/" target="_blank">RadBioBase</a></li>
+                        <li><a class="dropdown-item" href="https://pubchem.ncbi.nlm.nih.gov/idexchange/idexchange.cgi" target="_blank">Get SMILES by PubChem ID(CID)</a></li>
+                        <li><a class="dropdown-item" href="http://swisstargetprediction.ch/" target="_blank">SwissTargetPrediction</a></li>
+                        <li><a class="dropdown-item" href="https://mirtarbase.cuhk.edu.cn/~miRTarBase/miRTarBase_2025/php/index.php" target="_blank">miRTarBase</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="modal fade" id="updateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Recent Updates</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="timeline-item">
+                    <h6>2026/4/30</h6><p>Add Network Analysis function.</p>
+                    <h6>2026/4/12</h6><p>Add AI Analysis Compound Screening Result function.</p>
+                    <h6>2026/4/1</h6><p>Add Heavy Metal Decorporation Compound Screening function.<br>Create an application for the program.</p>
+                    <h6>2026/3/30</h6><p>Change mapping base on Gene name when data from Batman by API.</p>
+                    <h6>2026/3/16</h6><p>Add RadioProtect Formula Screening function.</p>
+                    <h6>2026/3/14</h6><p>Add RadioProtect TCM compound screening function.</p>
+                </div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button></div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid py-4">
+    <div id="home" class="page" style="display: block;">
+        <div class="text-center mb-5">
+            <h1 class="display-4 mb-3">Welcome to the Mengxiang Research Group</h1>
+            <p class="lead text-muted">A research group affiliated with Southwest University of Science and Technology</p>
+            
+            <div class="photo-wall mt-4 mb-5">
+                <div class="row g-3">
+                    <div class="col-6 col-md-3 photo-tooltip">
+                        <div class="ratio ratio-4x3 position-relative">
+                            <img src="./web_database_files/1.jpg" class="img-fluid rounded shadow object-fit-cover" alt="滇黄精">
+                            <div class="info-layer">
+                                <div class="scientific-name">Polygonatum kingianum</div>
+                                <div class="description">滇黄精：百合科黄精属草本植物。甘，平。补气养阴，健脾，润肺，益肾。</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 photo-tooltip">
+                        <div class="ratio ratio-4x3 position-relative">
+                            <img src="./web_database_files/2.jpg" class="img-fluid rounded shadow object-fit-cover" alt="白及">
+                            <div class="info-layer">
+                                <div class="scientific-name">Common Bletilla Rubber</div>
+                                <div class="description">白及：兰科植物白及的干燥块茎。收敛止血、消肿生肌。</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 photo-tooltip">
+                        <div class="ratio ratio-4x3 position-relative">
+                            <img src="./web_database_files/3.jpg" class="img-fluid rounded shadow object-fit-cover" alt="麦冬">
+                            <div class="info-layer">
+                                <div class="scientific-name">Ophiopogon japonicus</div>
+                                <div class="description">麦冬：百合科植物麦冬的干燥块根。养阴润肺，益胃生津，清心除烦。</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 photo-tooltip">
+                        <div class="ratio ratio-4x3 position-relative">
+                            <img src="./web_database_files/4.jpg" class="img-fluid rounded shadow object-fit-cover" alt="蜣螂">
+                            <div class="info-layer">
+                                <div class="scientific-name">Catharsius molossus</div>
+                                <div class="description">蜣螂：金龟子科动物屎壳螂的全虫。破瘀，定惊，通便，散结，拔毒去腐。</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card database-features">
+            <h2 class="section-title">Functional Modules</h2>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                        <div class="feature-card h-100" onclick="window.open('/Compound_screening.html')" style="cursor: pointer;">
+                            <div class="card-icon">
+                                <i></i>
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">RadioProtect Compound Screening</h3>
+                                <p class="card-text">
+                                    Formula or herb to search RadioProtect Compound and their Targets
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+               
+                    <div class="col-md-6 col-lg-4">
+                        <div class="feature-card h-100" onclick="window.open('/KEGG_GO.html')" style="cursor: pointer;">
+                            <div class="card-icon">
+                                <i></i>
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">KEGG GO Analysis</h3>
+                                <p class="card-text">
+                                    Analysis RadioProtect compound KEGG GO
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-4">
+                        <div class="feature-card h-100" onclick="window.open('/Network_Analysis.html')" style="cursor: pointer;">
+                            <div class="card-icon">
+                                <i></i>
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">Network Analysis</h3>
+                                <p class="card-text">
+                                    Analysis RadioProtect compound network
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-4">
+                        <div class="feature-card h-100" onclick="window.open('/Herb_miRNA_data.html')" style="cursor: pointer;">
+                            <div class="card-icon">
+                                <i></i>
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">Herb miRNA Data</h3>
+                                <p class="card-text">
+                                    Data from Herb Genomics Center（http://bencao.bmicc.cn/）. 
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-4">
+                        <div class="feature-card h-100" onclick="window.open('/AI_Analysis.html')" style="cursor: pointer;">
+                            <div class="card-icon">
+                                <i></i>
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">AI Analysis</h3>
+                                <p class="card-text">
+                                    Analysis RadioProtect compound
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-4">
+                        <div class="feature-card h-100" onclick="window.open('http://www.rnanut.net/rprh/index.php/home/predict')" style="cursor: pointer;">
+                            <div class="card-icon">
+                                <i></i>
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">Plant microRNA Targets in Human</h3>
+                                <p class="card-text">
+                                    Link to miRNA mapping. 
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-4">
+                        <div class="feature-card h-100" onclick="window.open('https://www.swissdock.ch/')" style="cursor: pointer;">
+                            <div class="card-icon">
+                                <i></i>
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">Molecule Dock</h3>
+                                <p class="card-text">
+                                    Link to SwissDock. 
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-4">
+                        <div class="feature-card h-100" onclick="window.open('http://bionet.ncpsb.org.cn/batman-tcm/#/search')" style="cursor: pointer;">
+                            <div class="card-icon">
+                                <i></i>
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">Target Prediction by Herb Formula or Compound</h3>
+                                <p class="card-text">
+                                    Link to BATMAN-Search. 
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-lg-10 mx-auto">
+                <div class="card academic-content">
+                    <div class="card-body">
+                        <h4 class="card-title text-center mb-4">About Mengxiang Research Group</h4>
+                        <p><strong>Team Leader:</strong> Ma Jiahua, Ph.D., Professor, Doctoral Supervisor. Sichuan overseas high-level talents, winner of Sichuan Youth Science and Technology Award, visiting scholar at University of Maryland, Senior Member of Chinese Pharmaceutical Association.</p>
+                        <p><strong>Selected Publications:</strong></p>
+                        <ol>
+                            <li>Hongmei Zhao, Xi He, Chengjia Tan, et al. Chitosan-melanin complex microsphere: A potential colonic delivery system for protein drugs. <em>Carbohyd Polym</em>, 2025,348:122886. (IF 10.7)</li>
+                            <li>Zhaoxia Tang, Jiali Luo, Yahya Faqir, et al. Berberine hydrochloride-loaded dung beetle chitosan/sodium alginate microspheres ameliorate DSS-induced colitis. <em>Int J Biol Macromol</em>, 2024,255:128219. (IF 7.7)</li>
+                            <li>Yahya Faqir, Yunlong Chai, Ali Murad Jakhar, et al. Chitosan microspheres-based controlled-release nitrogen fertilizers improve biological characteristics. <em>Int J Biol Macromol</em>, 2023,253:127124. (IF 7.7)</li>
+                            <li>Jiahua Ma*, Yahya Faqir, Chengjia Tan, et al. Terrestrial insects as a promising source of chitosan. <em>Food Chem</em>, 2022,373:131407. (IF 8.8)</li>
+                            <li>Wenjing Li, Libing Yu, Bo Fu, et al. Protective effects of Polygonatum kingianum polysaccharides on uranium-induced toxicity. <em>Int J Biol Macromol</em>, 2022,202:68-79. (IF 8.2)</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    2026 © 梦翔课题组.
+</div>
+
+
+<script>
+    function switchPage(pageId) {
+        document.querySelectorAll('.page').forEach(page => page.style.display = 'none');
+        const target = document.getElementById(pageId);
+        if (target) target.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        switchPage('home');
+
+        document.querySelectorAll('.dropdown-item[href]').forEach(item => {
+            let href = item.getAttribute('href');
+            if (href && (href.startsWith('http') || href.endsWith('.html'))) {
+                item.setAttribute('target', '_blank');
+            }
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+# System-dependent third-party libraries
+
+flask 
+pandas 
+requests 
+openai 
+numpy 
+matplotlib 
+seaborn 
+gseapy 
+networkx

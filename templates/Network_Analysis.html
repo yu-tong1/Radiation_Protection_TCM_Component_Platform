@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Analysis - RadioProtect TCM</title>
+    <link href="./web_database_files/bootstrap.min.css" rel="stylesheet">
+    <style>
+    body {
+        background-color: #f5f5f5;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        width: 90%;
+        margin: 0 auto;
+        max-width: 1400px;
+    }
+    header {
+        background-color: #4A7A4A;
+        color: white;
+        padding: 15px 0;
+        text-align: center;
+    }
+    .table-box {
+        background-color: white;
+        padding: 20px;
+        margin: 20px 0;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+    .filter-input,
+    .filter-select {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    .mode-tab {
+        padding: 10px 20px;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        font-size: 14px;
+    }
+    .mode-tab.active {
+        border-bottom-color: #4A7A4A;
+        font-weight: bold;
+    }
+    .mode-content {
+        display: none;
+    }
+    .mode-content.active {
+        display: block;
+    }
+    .analysis-result {
+        margin-top: 20px;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+    textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-family: Arial, sans-serif;
+    }
+    button {
+        background-color: #4A7A4A;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
+    }
+    button:hover {
+        background-color: #3d663d;
+    }
+    button:disabled {
+        background-color: #888;
+        cursor: not-allowed;
+    }
+    .loading-overlay {
+        text-align: center;
+        padding: 40px;
+        color: #4A7A4A;
+        font-size: 16px;
+    }
+    .error-message {
+        color: #d9534f;
+        padding: 15px;
+        background-color: #fdf2f2;
+        border-radius: 4px;
+    }
+    .success-message {
+        color: #28a745;
+        padding: 15px;
+        background-color: #f0fff4;
+        border-radius: 4px;
+    }
+	.bg-white\/90, .bg-white\/80 {
+            background-color: white;
+            border: 1px solid #ddd;
+    }
+        
+        footer {
+            background-color: #4A7A4A;
+            color: white;
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px 0;
+        }
+        
+        footer .border-t {
+            border-top: 1px solid #ddd;
+        }
+        
+        footer .text-gray-400 {
+            color: white;
+        }
+
+    .text-primary { color: black !important; }
+    .bg-primary { background: #333 !important; }
+	
+    .network-image {
+        max-width: 100%;
+        height: auto;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+    .stat-card {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+        border-left: 4px solid #4A7A4A;
+    }
+    .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #4A7A4A;
+    }
+    .stat-label {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+    }
+    .gene-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+    .gene-table th, .gene-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    .gene-table th {
+        background-color: #4A7A4A;
+        color: white;
+    }
+    .gene-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    .toggle-switch {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .toggle-switch input[type="checkbox"] {
+        width: 40px;
+        height: 20px;
+        appearance: none;
+        background-color: #ccc;
+        border-radius: 10px;
+        position: relative;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .toggle-switch input[type="checkbox"]:checked {
+        background-color: #4A7A4A;
+    }
+    .toggle-switch input[type="checkbox"]::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        background: white;
+        border-radius: 50%;
+        top: 2px;
+        left: 2px;
+        transition: transform 0.3s;
+    }
+    .toggle-switch input[type="checkbox"]:checked::after {
+        transform: translateX(20px);
+    }
+    .image-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-top: 20px;
+    }
+    @media (max-width: 768px) {
+        .image-container {
+            grid-template-columns: 1fr;
+        }
+    }
+    </style>
+</head>
+<body class="bg-light font-sans text-dark antialiased">
+
+<header>
+    <div class="container">
+        <h1>RadioProtect TCM · Network Analysis</h1>
+    </div>
+</header>
+
+<main class="container mx-auto px-4 py-12 max-w-6xl">
+    <section class="mb-12">
+        <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-6 md:p-8 border border-accent">
+            <div class="mb-6">
+                <h4 class="text-lg font-semibold mb-4 text-primary">Gene Network Analysis</h4>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2">Upload CSV Files</label>
+                    <input type="file" id="csv-files" multiple accept=".csv" class="filter-input">
+                    <p class="text-xs text-gray-500 mt-1">Please select one or more CSV files for analysis</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Tissue/Cell Line</label>
+                        <select id="tissue-cell-line" class="filter-select">
+                            <option value="">All Tissues</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-light p-4 rounded-lg border border-accent mb-6">
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="use-ai">
+                        <label for="use-ai" class="text-sm font-medium">Enable AI Enhanced Analysis</label>
+                    </div>
+                    <div id="ai-config" style="display: none; margin-top: 15px;">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-xs font-medium mb-1">API Key</label>
+                                <input type="password" id="api-key" class="filter-input" placeholder="Enter your API key">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1">API Base URL</label>
+                                <input type="text" id="api-base" class="filter-input" value="https://api.deepseek.com">
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-xs font-medium mb-1">AI Model</label>
+                            <select id="ai-model" class="filter-select">
+                                <optgroup label="GPT">
+                                    <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+                                    <option value="gpt-4">gpt-4</option>
+                                    <option value="gpt-4-turbo">gpt-4-turbo</option>
+                                    <option value="gpt-4o">gpt-4o</option>
+                                    <option value="gpt-4o-mini">gpt-4o-mini</option>
+                                </optgroup>
+                                <optgroup label="DeepSeek">
+                                    <option value="deepseek-v4-flash">deepseek-v4-flash</option>
+                                    <option value="deepseek-v4-pro">deepseek-v4-pro</option>
+                                </optgroup>
+                                <optgroup label="元宝">
+                                    <option value="yuanbao-13b-chat">yuanbao-13b-chat</option>
+                                    <option value="yuanbao-70b-chat">yuanbao-70b-chat</option>
+                                </optgroup>
+                                <optgroup label="讯飞星火">
+                                    <option value="spark-1.5">spark-1.5</option>
+                                    <option value="spark-2.0">spark-2.0</option>
+                                    <option value="spark-3.0">spark-3.0</option>
+                                    <option value="spark-4.0">spark-4.0</option>
+                                </optgroup>
+                                <optgroup label="文心一言">
+                                    <option value="ernie-3.5">ernie-3.5</option>
+                                    <option value="ernie-4.0">ernie-4.0</option>
+                                    <option value="ernie-turbo">ernie-turbo</option>
+                                </optgroup>
+                                <optgroup label="豆包">
+                                    <option value="doubao-pro">doubao-pro</option>
+                                    <option value="doubao-lite">doubao-lite</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1">System Prompt (optional)</label>
+                            <textarea id="system-prompt" class="filter-input" rows="3" placeholder="Enter system prompt here"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="run-analysis" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition-colors">
+                    Run Network Analysis
+                </button>
+            </div>
+
+            <div id="analysis-result" class="analysis-result" style="display: none;">
+                <h5 class="font-semibold mb-4">Analysis Results</h5>
+                <div id="result-content"></div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="bg-dark text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center gap-2">
+                        <h3 class="foottext">RadioProtect TCM · Screening platform</h3>
+            </div>
+            <div>
+                &copy; 2026 梦翔课题组.
+            </div>
+        </div>
+</footer>
+
+<script>
+    function loadTissueTypes(files) {
+        const formData = new FormData();
+        for (let i = 0; i < files.length; i++) {
+            formData.append('files', files[i]);
+        }
+        
+        fetch('/api/get-tissue-types', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const select = document.getElementById('tissue-cell-line');
+                select.innerHTML = '<option value="">All Tissues</option>';
+                data.tissue_types.forEach(tissue => {
+                    const option = document.createElement('option');
+                    option.value = tissue;
+                    option.textContent = tissue;
+                    select.appendChild(option);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading tissue types:', error);
+        });
+    }
+
+    document.getElementById('use-ai').addEventListener('change', function() {
+        const aiConfig = document.getElementById('ai-config');
+        aiConfig.style.display = this.checked ? 'block' : 'none';
+    });
+
+    document.getElementById('run-analysis').addEventListener('click', function() {
+        const files = document.getElementById('csv-files').files;
+        if (files.length === 0) {
+            alert('Please select at least one CSV file');
+            return;
+        }
+
+        const tissueCellLine = document.getElementById('tissue-cell-line').value || '';
+        const useAI = document.getElementById('use-ai').checked;
+        const apiKey = document.getElementById('api-key').value;
+        const apiBase = document.getElementById('api-base').value;
+        const model = document.getElementById('ai-model').value;
+        const systemPrompt = document.getElementById('system-prompt').value;
+
+        const resultDiv = document.getElementById('analysis-result');
+        const resultContent = document.getElementById('result-content');
+        const button = this;
+
+        button.disabled = true;
+        button.textContent = 'Analyzing...';
+        resultDiv.style.display = 'block';
+        resultContent.innerHTML = '<div class="loading-overlay"><i class="fas fa-spinner fa-spin"></i> Analyzing network... This may take a few minutes.</div>';
+
+        const formData = new FormData();
+        for (let i = 0; i < files.length; i++) {
+            formData.append('files', files[i]);
+        }
+        formData.append('tissue_cell_line', tissueCellLine);
+        formData.append('use_ai', useAI);
+        
+        if (useAI) {
+            formData.append('api_key', apiKey);
+            formData.append('api_base', apiBase);
+            formData.append('model', model);
+            formData.append('system_prompt', systemPrompt);
+        }
+
+        fetch('/api/network-analysis', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            button.disabled = false;
+            button.textContent = 'Run Network Analysis';
+
+            if (data.success) {
+                let html = '';
+
+                if (data.network_stats) {
+                    html += '<h6 class="font-semibold mt-4 mb-3">Network Statistics</h6>';
+                    html += '<div class="stat-grid">';
+                    html += `<div class="stat-card"><div class="stat-value">${data.network_stats.nodes}</div><div class="stat-label">Nodes (Genes)</div></div>`;
+                    html += `<div class="stat-card"><div class="stat-value">${data.network_stats.edges}</div><div class="stat-label">Edges (Interactions)</div></div>`;
+                    if (data.network_stats.avg_degree) {
+                        html += `<div class="stat-card"><div class="stat-value">${data.network_stats.avg_degree.toFixed(2)}</div><div class="stat-label">Average Degree</div></div>`;
+                    }
+                    if (data.network_stats.density) {
+                        html += `<div class="stat-card"><div class="stat-value">${data.network_stats.density.toFixed(4)}</div><div class="stat-label">Network Density</div></div>`;
+                    }
+                    if (data.network_stats.connected_components) {
+                        html += `<div class="stat-card"><div class="stat-value">${data.network_stats.connected_components}</div><div class="stat-label">Connected Components</div></div>`;
+                    }
+                    if (data.network_stats.data_edges !== undefined) {
+                        html += `<div class="stat-card"><div class="stat-value">${data.network_stats.data_edges}</div><div class="stat-label">Data Edges</div></div>`;
+                    }
+                    if (data.network_stats.ai_predicted_edges !== undefined) {
+                        html += `<div class="stat-card"><div class="stat-value">${data.network_stats.ai_predicted_edges}</div><div class="stat-label">AI Predicted Edges</div></div>`;
+                    }
+                    html += '</div>';
+                }
+
+                if (data.ppi_network || data.gene_compound_network) {
+                    html += '<div class="image-container">';
+                    if (data.ppi_network) {
+                        const ppiFilename = data.ppi_network.split('/').pop();
+                        html += `<div><h6 class="font-semibold mb-2">PPI Network</h6><img src="/network-image/${ppiFilename}" class="network-image" alt="PPI Network"></div>`;
+                    }
+                    if (data.gene_compound_network) {
+                        const gcFilename = data.gene_compound_network.split('/').pop();
+                        html += `<div><h6 class="font-semibold mb-2">Gene-Compound Network</h6><img src="/network-image/${gcFilename}" class="network-image" alt="Gene-Compound Network"></div>`;
+                    }
+                    html += '</div>';
+                }
+
+                if (data.key_genes && data.key_genes.length > 0) {
+                    html += '<h6 class="font-semibold mt-4 mb-3">Key Genes</h6>';
+                    html += '<table class="gene-table">';
+                    html += '<thead><tr>';
+                    html += '<th>Gene</th>';
+                    if (data.key_genes[0].mcode_score !== undefined) {
+                        html += '<th>MCODE Score</th>';
+                        html += '<th>Cluster Size</th>';
+                        html += '<th>Cluster Rank</th>';
+                    }
+                    if (data.key_genes[0].importance_score !== undefined) {
+                        html += '<th>Importance Score</th>';
+                        html += '<th>AI Rank</th>';
+                        if (data.key_genes[0].reason) {
+                            html += '<th>Reason</th>';
+                        }
+                    }
+                    html += '</tr></thead>';
+                    html += '<tbody>';
+                    data.key_genes.forEach(gene => {
+                        html += '<tr>';
+                        html += `<td>${gene.gene}</td>`;
+                        if (gene.mcode_score !== undefined) {
+                            html += `<td>${gene.mcode_score.toFixed(4)}</td>`;
+                            html += `<td>${gene.cluster_size}</td>`;
+                            html += `<td>${gene.cluster_rank}</td>`;
+                        }
+                        if (gene.importance_score !== undefined) {
+                            html += `<td>${gene.importance_score}</td>`;
+                            html += `<td>${gene.ai_rank}</td>`;
+                            if (gene.reason) {
+                                html += `<td>${gene.reason}</td>`;
+                            }
+                        }
+                        html += '</tr>';
+                    });
+                    html += '</tbody></table>';
+                }
+
+                if (data.ai_gene_selection) {
+                    html += '<h6 class="font-semibold mt-4 mb-3">AI Gene Selection Summary</h6>';
+                    html += `<div style="white-space: pre-wrap; background: #f0f8ff; padding: 15px; border-radius: 6px;">${data.ai_gene_selection}</div>`;
+                }
+
+                if (data.ai_interaction_prediction) {
+                    html += '<h6 class="font-semibold mt-4 mb-3">AI Interaction Prediction Summary</h6>';
+                    html += `<div style="white-space: pre-wrap; background: #f0f8ff; padding: 15px; border-radius: 6px;">${data.ai_interaction_prediction}</div>`;
+                }
+
+                if (data.key_genes_csv) {
+                    const csvFilename = data.key_genes_csv.split('/').pop();
+                    html += `<div class="mt-4"><a href="/network-image/${csvFilename}" class="btn btn-primary" download>Download Key Genes CSV</a></div>`;
+                }
+
+                html = '<div class="success-message">Analysis completed successfully!</div>' + html;
+                resultContent.innerHTML = html;
+            } else {
+                resultContent.innerHTML = '<div class="error-message">' + data.error + '</div>';
+            }
+        })
+        .catch(error => {
+            button.disabled = false;
+            button.textContent = 'Run Network Analysis';
+            resultContent.innerHTML = '<div class="error-message">Error: ' + error.message + '</div>';
+        });
+    });
+
+    document.getElementById('csv-files').addEventListener('change', function() {
+        const files = this.files;
+        if (files.length > 0) {
+            loadTissueTypes(files);
+        }
+    });
+</script>
+
+</body>
+</html>
