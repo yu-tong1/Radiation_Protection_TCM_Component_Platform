@@ -104,7 +104,6 @@ def process_tcm_file_normal(tcm_file_path, original_filename):
 
 
 def handle_file_upload(file_path, original_filename):
-    """处理文件上传筛选流程"""
     try:
         matched, unmatched = process_tcm_file_normal(file_path, original_filename)
 
@@ -127,7 +126,6 @@ def handle_file_upload(file_path, original_filename):
 
 
 def handle_query_target(data, upload_folder='uploads'):
-    """处理靶点查询流程"""
     try:
         content = data.get('content')
         if not content or not isinstance(content, list):
