@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800">
+
+<header class="bg-emerald-700 text-white py-4 text-center">
+    <div>
+        <h1 class="text-2xl">AI分析</h1>
+    </div>
+</header>
+
+<main class="container mx-auto px-4 py-12 max-w-7xl">
+    <section class="mb-16">
+        <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-gray-300">
+            <div id="compound-analysis">
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold mb-4">化合物筛选AI分析</h4>
+
+                    <div class="flex border-b border-gray-200 mb-6">
+                        <div class="bg-emerald-600 text-white px-4 py-2 font-medium rounded-t-lg" data-submode="normal">
+                            辐射防护
+                        </div>
+                    </div>
+					
+					<!-- File Upload -->
+                    <div class="bg-gray-50/80 rounded-xl p-4 border border-emerald-300 mb-6">
+                        <h5 class="text-sm font-semibold mb-3 text-gray-800">上传CSV文件</h5>
+                        <div id="fileUploadArea" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-emerald-400 transition-colors cursor-pointer">
+                            <p class="text-gray-600">点击或拖拽CSV文件到此处上传</p>
+                            <p class="text-xs text-gray-500 mt-2">支持上传一个或多个CSV文件</p>
+                            <input type="file" id="fileInput" accept=".csv" multiple class="hidden">
+                        </div>
+                        <div id="fileList" class="mt-4 space-y-2"></div>
+                    </div>
+					
+                    <!-- API Configuration -->
+                    <div class="bg-gray-50/80 rounded-xl p-4 border border-emerald-300 mb-6">
+                        <h5 class="text-sm font-semibold mb-3 text-gray-800">API配置</h5>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium mb-1 text-gray-600">API Key</label>
+                                <input type="password" id="api-key" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 bg-white" placeholder="Enter your API key" value="">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1 text-gray-600">API Base URL</label>
+                                <input type="text" id="api-base" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 bg-white" value="https://api.deepseek.com">
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <label class="block text-xs font-medium mb-1 text-gray-600">AI模型</label>
+                            <select id="ai-model" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 bg-white">
+                                <optgroup label="GPT">
+                                    <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+                                    <option value="gpt-4">gpt-4</option>
+                                    <option value="gpt-4-turbo">gpt-4-turbo</option>
+                                    <option value="gpt-4o">gpt-4o</option>
+                                    <option value="gpt-4o-mini">gpt-4o-mini</option>
+                                </optgroup>
+                                <optgroup label="DeepSeek">
+                                    <option value="deepseek-v4-flash">deepseek-v4-flash</option>
+                                    <option value="deepseek-v4-pro">deepseek-v4-pro</option>
+                                </optgroup>
+                                <optgroup label="元宝">
+                                    <option value="yuanbao-13b-chat">yuanbao-13b-chat</option>
+                                    <option value="yuanbao-70b-chat">yuanbao-70b-chat</option>
+                                </optgroup>
+                                <optgroup label="讯飞星火">
+                                    <option value="spark-1.5">spark-1.5</option>
+                                    <option value="spark-2.0">spark-2.0</option>
+                                    <option value="spark-3.0">spark-3.0</option>
+                                    <option value="spark-4.0">spark-4.0</option>
+                                </optgroup>
+                                <optgroup label="文心一言">
+                                    <option value="ernie-3.5">ernie-3.5</option>
+                                    <option value="ernie-4.0">ernie-4.0</option>
+                                    <option value="ernie-turbo">ernie-turbo</option>
+                                </optgroup>
+                                <optgroup label="豆包">
+                                    <option value="doubao-pro">doubao-pro</option>
+                                    <option value="doubao-lite">doubao-lite</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Prompt Configuration -->
+                    <div class="bg-gray-50/80 rounded-xl p-4 border border-emerald-300 mb-6">
+                        <h5 class="text-sm font-semibold mb-3 text-gray-800">提示词配置</h5>
+                        <div>
+                            <label class="block text-xs font-medium mb-1 text-gray-600">系统提示词</label>
+                            <textarea id="system-prompt" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 bg-white" rows="8" placeholder="Enter system prompt here">你是一位专业的辐射防护和中药成分分析专家。请根据提供的化合物筛选结果，
+进行专业的分析和解读。请从以下几个方面分析：
+1. 化合物的种类富集情况（皂苷、萜类、生物碱、多糖、氨基酸及其衍生物、黄酮、脂类、核酸等）
+2. 主要基因和通路的富集情况
+3. 化合物的药物相似性和口服生物利用度
+4. 针对特定辐射类型的防护机制
+5. 潜在的辐射防护靶点和机制
+6. 对不同中药的抗辐射潜力进行评估和比较
+7. 给出实验或应用建议
+
+请用中文回答，语言要专业但易懂，结构清晰。</textarea>
+                        </div>
+                    </div>
+                    
+                    <button id="analyze-compound" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-8 rounded-xl transition-all flex items-center justify-center gap-2 shadow-md">
+                        运行AI分析
+                    </button>
+                </div>
+                <div id="compound-result" class="hidden mt-6 pt-4 border-t border-emerald-300/50">
+                    <h5 class="font-semibold mb-3 flex items-center gap-2 text-gray-800">AI分析结果</h5>
+                    <div id="compound-result-content" class="bg-gray-50/80 rounded-xl p-4 border border-emerald-300"></div>
+                </div>
+            </div>
+
+
+        </div>
+    </section>
+</main>
+
+<footer class="bg-emerald-700 text-white py-4 text-center">
+    <div>
+        <div>
+            <div class="mb-4 md:mb-0">
+                <div class="text-2xl">
+                    <h3>AI分析系统</h3>
+                </div>
+                <div>
+                    &copy; 2026 梦翔课题组.
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // 文件上传相关变量
+    const fileUploadArea = document.getElementById('fileUploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const uploadedFiles = [];
+
+    // 点击上传区域触发文件选择
+    fileUploadArea.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    // 拖拽上传
+    fileUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.add('dragover');
+    });
+
+    fileUploadArea.addEventListener('dragleave', () => {
+        fileUploadArea.classList.remove('dragover');
+    });
+
+    fileUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+    });
+
+    // 文件选择变化
+    fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+    });
+
+    // 处理文件
+    function handleFiles(files) {
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (file.name.endsWith('.csv')) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    uploadedFiles.push({
+                        filename: file.name,
+                        content: event.target.result
+                    });
+                    updateFileList();
+                };
+                reader.readAsText(file);
+            } else {
+                alert(`文件 ${file.name} 不是CSV格式，请上传CSV文件`);
+            }
+        }
+        // 清空input以便可以重复选择相同文件
+        fileInput.value = '';
+    }
+
+    // 更新文件列表显示
+    function updateFileList() {
+        if (uploadedFiles.length === 0) {
+            fileList.innerHTML = '';
+            return;
+        }
+        fileList.innerHTML = uploadedFiles.map((file, index) => `
+            <div class="flex items-center justify-between bg-white border border-gray-200 rounded-lg px-4 py-2">
+                <span class="text-sm text-gray-700">${file.filename}</span>
+                <button onclick="removeFile(${index})" class="text-sm text-red-500 hover:text-red-700">删除</button>
+            </div>
+        `).join('');
+    }
+
+    // 删除文件
+    function removeFile(index) {
+        uploadedFiles.splice(index, 1);
+        updateFileList();
+    }
+
+    // AI分析按钮点击事件
+    document.getElementById('analyze-compound').addEventListener('click', function() {
+        if (uploadedFiles.length === 0) {
+            alert('请先上传CSV文件');
+            return;
+        }
+
+        const apiKey = document.getElementById('api-key').value;
+        const apiBase = document.getElementById('api-base').value;
+        const systemPrompt = document.getElementById('system-prompt').value;
+        const model = document.getElementById('ai-model').value;
+
+        const resultDiv = document.getElementById('compound-result');
+        const resultContent = document.getElementById('compound-result-content');
+        
+
+        resultContent.innerHTML = '<div class="flex items-center justify-center py-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div><span class="ml-3 text-gray-600">分析中...</span></div>';
+        resultDiv.classList.remove('hidden');
+
+        fetch('/api/analyze-compound', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                files: uploadedFiles,
+                api_key: apiKey,
+                api_base: apiBase,
+                system_prompt: systemPrompt,
+                model: model
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                resultContent.innerHTML = '<div class="prose prose-sm max-w-none">' + data.result + '</div>';
+            } else {
+                resultContent.innerHTML = '<div class="text-red-600 bg-red-50 rounded-lg p-4">' + data.error + '</div>';
+            }
+        })
+        .catch(error => {
+            resultContent.innerHTML = '<div class="text-red-600 bg-red-50 rounded-lg p-4">Error: ' + error.message + '</div>';
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基因网络分析系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800">
+    <header class="bg-emerald-700 text-white py-4 text-center">
+        <div>
+            <h1 class="text-xl">基因网络分析</h1>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-12 max-w-7xl">
+        <section class="mb-16">
+            <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-gray-300">
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold mb-4">基因网络分析</h4>
+
+                    <div class="mb-6">
+                        <div><label class="block text-sm font-medium text-gray-800/80 mb-2">上传中药成分文件 (CSV)</label>
+						<div class="flex flex-col md:flex-row gap-4">
+							<div id="fileUploadArea" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-emerald-400 transition-colors cursor-pointer">
+							<p class="text-gray-600">点击或拖拽CSV文件到此处上传</p>
+							<p class="text-xs text-gray-500 mt-2">支持上传一个或多个CSV文件</p>
+							<input type="file" id="fileInput" accept=".csv" multiple class="hidden">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-700">组织/细胞系</label>
+                            <select id="tissue-cell-line" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 bg-white">
+                                <option value="">所有组织</option>
+                            </select>
+                        </div>
+                    </div>
+                    	</div>
+						<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-700">最低互作分数</label>
+                            <input type="number" id="MRI_score" name="MRI_score" step="0.1" min="0" max="1" value="0.4" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-700">图形宽度</label>
+                            <input type="number" id="figsize_w" name="figsize_w" step="0.5" min="1" value="16" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-700">图形高度</label>
+                            <input type="number" id="figsize_h" name="figsize_h" step="0.5" min="1" value="12" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-700">score_threshold</label>
+                            <input type="number" id="score_threshold" name="score_threshold" step="0.1" min="0" max="1" value="0.2" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 bg-white">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-700">degree_cutoff</label>
+                            <input type="number" id="degree_cutoff" name="degree_cutoff" min="1" value="2" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-700">max_depth</label>
+                            <input type="number" id="max_depth" name="max_depth" min="1" value="100" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-700">图片分辨率</label>
+                            <input type="number" id="dpi" name="dpi" min="72" value="300" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 bg-white">
+                        </div>
+					<button id="run-analysis" class="w-40 h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-8 rounded-xl transition-all flex items-center justify-center gap-2 shadow-md">
+                        运行网络分析
+                    </button>
+                </div>
+				<div class="w-full h-11 bg-gray-50/80 rounded-xl p-4 border border-emerald-300 mb-6">
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="use-ai">
+                            <label for="use-ai" class="text-sm font-medium text-gray-700">启用AI增强分析</label>
+                        </div>
+                        <div id="ai-config" style="display: none; margin-top: 15px;">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-600">API Key</label>
+                                    <input type="password" id="api-key" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 bg-white" placeholder="Enter your API key">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-600">API Base URL</label>
+                                    <input type="text" id="api-base" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 bg-white" value="https://api.deepseek.com">
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-xs font-medium mb-1 text-gray-600">AI模型</label>
+                                <select id="ai-model" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 bg-white">
+                                    <optgroup label="GPT">
+                                        <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+                                        <option value="gpt-4">gpt-4</option>
+                                        <option value="gpt-4-turbo">gpt-4-turbo</option>
+                                        <option value="gpt-4o">gpt-4o</option>
+                                        <option value="gpt-4o-mini">gpt-4o-mini</option>
+                                    </optgroup>
+                                    <optgroup label="DeepSeek">
+                                        <option value="deepseek-v4-flash">deepseek-v4-flash</option>
+                                        <option value="deepseek-v4-pro">deepseek-v4-pro</option>
+                                    </optgroup>
+                                    <optgroup label="元宝">
+                                        <option value="yuanbao-13b-chat">yuanbao-13b-chat</option>
+                                        <option value="yuanbao-70b-chat">yuanbao-70b-chat</option>
+                                    </optgroup>
+                                    <optgroup label="讯飞星火">
+                                        <option value="spark-1.5">spark-1.5</option>
+                                        <option value="spark-2.0">spark-2.0</option>
+                                        <option value="spark-3.0">spark-3.0</option>
+                                        <option value="spark-4.0">spark-4.0</option>
+                                    </optgroup>
+                                    <optgroup label="文心一言">
+                                        <option value="ernie-3.5">ernie-3.5</option>
+                                        <option value="ernie-4.0">ernie-4.0</option>
+                                        <option value="ernie-turbo">ernie-turbo</option>
+                                    </optgroup>
+                                    <optgroup label="豆包">
+                                        <option value="doubao-pro">doubao-pro</option>
+                                        <option value="doubao-lite">doubao-lite</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1 text-gray-600">系统提示词 (可选)</label>
+                                <textarea id="system-prompt" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 bg-white" rows="3" placeholder="Enter system prompt here"></textarea>
+                            </div>
+                            <div class="mt-4">
+                                <label class="block text-xs font-medium mb-1 text-gray-600">上传液相质谱数据 (LC-MS) (CSV) (可选)</label>
+                                <div id="lcmsUploadArea" class="border-2 border-dashed border-blue-300 rounded-xl p-6 text-center hover:border-blue-400 transition-colors cursor-pointer">
+                                    <p class="text-gray-600 text-sm">点击或拖拽LC-MS CSV文件到此处上传</p>
+                                    <p class="text-xs text-gray-500 mt-1">需包含"Tentative Identification"和"Abundance"列</p>
+                                    <input type="file" id="lcmsFileInput" accept=".csv" class="hidden">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                <div id="analysis-result" class="hidden mt-6 pt-4 border-t border-emerald-300/50">
+                    <h5 class="font-semibold mb-3 flex items-center gap-2 text-gray-800">分析结果</h5>
+                    <div id="result-content" class="bg-gray-50/80 rounded-xl p-4 border border-emerald-300"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-emerald-700 text-white py-4 text-center">
+        <div>
+            <div>
+                <div class="mb-4 md:mb-0">
+                    <div class="text-2xl">
+                        <h3>基因网络分析系统</h3>
+                    </div>
+                    <div>
+                        &copy; 2026 梦翔课题组.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+		(function() {
+        const uploadArea = document.getElementById('fileUploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const originalText = uploadArea.querySelector('p:first-child').innerHTML;
+        
+        uploadArea.addEventListener('click', function(e) {
+            e.stopPropagation();
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                const count = this.files.length;
+                const names = Array.from(this.files).map(f => f.name);
+                let displayText = `已选择 ${count} 个文件：`;
+                if (count <= 3) {
+                    displayText += names.join(', ');
+                } else {
+                    displayText += names.slice(0, 3).join(', ') + ` 等${count}个文件`;
+                }
+                uploadArea.querySelector('p:first-child').innerHTML = displayText;
+                uploadArea.querySelector('p:first-child').classList.add('text-emerald-600', 'font-medium');
+            } else {
+                uploadArea.querySelector('p:first-child').innerHTML = originalText;
+                uploadArea.querySelector('p:first-child').classList.remove('text-emerald-600', 'font-medium');
+            }
+        });
+        
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('border-emerald-500', 'bg-emerald-50');
+        });
+        
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('border-emerald-500', 'bg-emerald-50');
+        });
+        
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('border-emerald-500', 'bg-emerald-50');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const csvFiles = Array.from(files).filter(f => f.name.endsWith('.csv'));
+                if (csvFiles.length === 0) {
+                    alert('请上传CSV格式的文件');
+                    return;
+                }
+                const dataTransfer = new DataTransfer();
+                csvFiles.forEach(f => dataTransfer.items.add(f));
+                fileInput.files = dataTransfer.files;
+                const changeEvent = new Event('change', { bubbles: true });
+                fileInput.dispatchEvent(changeEvent);
+            }
+        });
+    })();
+		
+        function loadTissueTypes(files) {
+            const formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files', files[i]);
+            }
+            
+            fetch('/api/get-tissue-types', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const select = document.getElementById('tissue-cell-line');
+                    select.innerHTML = '<option value="">All Tissues</option>';
+                    data.tissue_types.forEach(tissue => {
+                        const option = document.createElement('option');
+                        option.value = tissue;
+                        option.textContent = tissue;
+                        select.appendChild(option);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('加载组织类型失败出错:', error);
+            });
+        }
+
+        (function() {
+            const lcmsUploadArea = document.getElementById('lcmsUploadArea');
+            const lcmsFileInput = document.getElementById('lcmsFileInput');
+            const lcmsOriginalText = lcmsUploadArea.querySelector('p:first-child').innerHTML;
+            
+            lcmsUploadArea.addEventListener('click', function(e) {
+                e.stopPropagation();
+                lcmsFileInput.click();
+            });
+            
+            lcmsFileInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    const names = Array.from(this.files).map(f => f.name);
+                    lcmsUploadArea.querySelector('p:first-child').innerHTML = `已选择: ${names.join(', ')}`;
+                    lcmsUploadArea.querySelector('p:first-child').classList.add('text-blue-600', 'font-medium');
+                } else {
+                    lcmsUploadArea.querySelector('p:first-child').innerHTML = lcmsOriginalText;
+                    lcmsUploadArea.querySelector('p:first-child').classList.remove('text-blue-600', 'font-medium');
+                }
+            });
+            
+            lcmsUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                lcmsUploadArea.classList.add('border-blue-500', 'bg-blue-50');
+            });
+            
+            lcmsUploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                lcmsUploadArea.classList.remove('border-blue-500', 'bg-blue-50');
+            });
+            
+            lcmsUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                lcmsUploadArea.classList.remove('border-blue-500', 'bg-blue-50');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const csvFiles = Array.from(files).filter(f => f.name.endsWith('.csv'));
+                    if (csvFiles.length === 0) {
+                        alert('请上传CSV格式的文件');
+                        return;
+                    }
+                    const dataTransfer = new DataTransfer();
+                    csvFiles.slice(0, 1).forEach(f => dataTransfer.items.add(f));
+                    lcmsFileInput.files = dataTransfer.files;
+                    const changeEvent = new Event('change', { bubbles: true });
+                    lcmsFileInput.dispatchEvent(changeEvent);
+                }
+            });
+        })();
+
+        document.getElementById('use-ai').addEventListener('change', function() {
+            const aiConfig = document.getElementById('ai-config');
+            aiConfig.style.display = this.checked ? 'block' : 'none';
+        });
+
+        document.getElementById('run-analysis').addEventListener('click', function() {
+            const files = document.getElementById('fileInput').files;
+            if (files.length === 0) {
+                alert('请选择上传的CSV文件');
+                return;
+            }
+
+            const tissueCellLine = document.getElementById('tissue-cell-line').value || '';
+            const useAI = document.getElementById('use-ai').checked;
+            const apiKey = document.getElementById('api-key').value;
+            const apiBase = document.getElementById('api-base').value;
+            const model = document.getElementById('ai-model').value;
+            const systemPrompt = document.getElementById('system-prompt').value;
+            const resultDiv = document.getElementById('analysis-result');
+            const resultContent = document.getElementById('result-content');
+            const MRI_score = document.getElementById('MRI_score').value;
+            const figsize_w = document.getElementById('figsize_w').value;
+            const figsize_h = document.getElementById('figsize_h').value;
+            const score_threshold = document.getElementById('score_threshold').value;
+            const degree_cutoff = document.getElementById('degree_cutoff').value;
+            const max_depth = document.getElementById('max_depth').value;
+            const dpi = document.getElementById('dpi').value;
+            const button = this;
+
+            button.disabled = true;
+            button.textContent = '分析中...';
+            resultDiv.style.display = 'block';
+            resultContent.innerHTML = '<div class="flex items-center justify-center py-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div><span class="ml-3 text-gray-600">分析网络中...可能需要几分钟。</span></div>';
+
+            const formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files', files[i]);
+            }
+            
+            const lcmsFile = document.getElementById('lcmsFileInput').files[0];
+            if (lcmsFile) {
+                formData.append('lcms_file', lcmsFile);
+            }
+            
+            formData.append('tissue_cell_line', tissueCellLine);
+            formData.append('use_ai', useAI);
+            formData.append('MRI_score', MRI_score);
+            formData.append('figsize_w', figsize_w);
+            formData.append('figsize_h', figsize_h);
+            formData.append('score_threshold', score_threshold);
+            formData.append('degree_cutoff', degree_cutoff);
+            formData.append('max_depth', max_depth);
+            formData.append('dpi', dpi);
+            
+            if (useAI) {
+                formData.append('api_key', apiKey);
+                formData.append('api_base', apiBase);
+                formData.append('model', model);
+                formData.append('system_prompt', systemPrompt);
+            }
+
+            fetch('/api/network-analysis', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                button.disabled = false;
+                button.textContent = '运行网络分析';
+
+                if (data.success) {
+                    let html = '';
+
+                    if (data.network_stats) {
+                    html += '<h6 class="font-semibold mt-4 mb-3 text-gray-800">网络统计</h6>';
+                    html += '<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">';
+                    html += `<div class="bg-white rounded-lg p-4 border border-emerald-300"><div class="text-2xl font-bold text-emerald-600">${data.network_stats.nodes}</div><div class="text-xs text-gray-600 mt-1">节点 (基因)</div></div>`;
+                    html += `<div class="bg-white rounded-lg p-4 border border-emerald-300"><div class="text-2xl font-bold text-emerald-600">${data.network_stats.edges}</div><div class="text-xs text-gray-600 mt-1">边 (相互作用)</div></div>`;
+                    if (data.network_stats.avg_degree) {
+                        html += `<div class="bg-white rounded-lg p-4 border border-emerald-300"><div class="text-2xl font-bold text-emerald-600">${data.network_stats.avg_degree.toFixed(2)}</div><div class="text-xs text-gray-600 mt-1">平均度</div></div>`;
+                    }
+                    if (data.network_stats.density) {
+                        html += `<div class="bg-white rounded-lg p-4 border border-emerald-300"><div class="text-2xl font-bold text-emerald-600">${data.network_stats.density.toFixed(4)}</div><div class="text-xs text-gray-600 mt-1">网络密度</div></div>`;
+                    }
+                    if (data.network_stats.connected_components) {
+                        html += `<div class="bg-white rounded-lg p-4 border border-emerald-300"><div class="text-2xl font-bold text-emerald-600">${data.network_stats.connected_components}</div><div class="text-xs text-gray-600 mt-1">连通分量</div></div>`;
+                    }
+                    if (data.network_stats.string_edges !== undefined) {
+                        html += `<div class="bg-white rounded-lg p-4 border border-gray-300"><div class="text-2xl font-bold text-gray-600">${data.network_stats.string_edges}</div><div class="text-xs text-gray-600 mt-1">STRING数据库边</div></div>`;
+                    }
+                    if (data.network_stats.ai_predicted_edges !== undefined) {
+                        html += `<div class="bg-white rounded-lg p-4 border border-red-300"><div class="text-2xl font-bold text-red-600">${data.network_stats.ai_predicted_edges}</div><div class="text-xs text-gray-600 mt-1">AI预测边</div></div>`;
+                    }
+                    if (data.network_stats.ai_enhanced_edges !== undefined) {
+                        html += `<div class="bg-white rounded-lg p-4 border border-green-300"><div class="text-2xl font-bold text-green-600">${data.network_stats.ai_enhanced_edges}</div><div class="text-xs text-gray-600 mt-1">STRING+AI混合边</div></div>`;
+                    }
+                    html += '</div>';
+                }
+
+                    if (data.ppi_network || data.gene_compound_network) {
+                        html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">';
+                        if (data.ppi_network) {
+                            const ppiFilename = data.ppi_network.split('/').pop();
+                            html += `<div class="bg-white rounded-xl p-4 border border-gray-300"><h6 class="font-semibold mb-2 text-gray-800">PPI网络</h6><img src="/network-image/${ppiFilename}" class="w-full h-auto rounded-lg border border-gray-200" alt="PPI Network"></div>`;
+                        }
+                        if (data.gene_compound_network) {
+                            const gcFilename = data.gene_compound_network.split('/').pop();
+                            html += `<div class="bg-white rounded-xl p-4 border border-gray-300"><h6 class="font-semibold mb-2 text-gray-800">基因-化合物网络</h6><img src="/network-image/${gcFilename}" class="w-full h-auto rounded-lg border border-gray-200" alt="Gene-Compound Network"></div>`;
+                        }
+                        html += '</div>';
+                    }
+
+                    if (data.compound_network_from_ppi) {
+                        const compoundFilename = data.compound_network_from_ppi.split('/').pop();
+                        html += '<div class="mt-4"><div class="bg-white rounded-xl p-4 border border-gray-300"><h6 class="font-semibold mb-2 text-gray-800">化合物相互作用网络（基于AI增强PPI）</h6><img src="/network-image/' + compoundFilename + '" class="w-full h-auto rounded-lg border border-gray-200" alt="Compound Network"></div></div>';
+                    }
+
+                    if (data.cornerstone_network_viz) {
+                        const cornerstoneFilename = data.cornerstone_network_viz.split('/').pop();
+                        html += '<div class="mt-4"><div class="bg-white rounded-xl p-4 border border-gray-300"><h6 class="font-semibold mb-2 text-gray-800">关键化合物网络（红色节点为核心化合物）</h6><img src="/network-image/' + cornerstoneFilename + '" class="w-full h-auto rounded-lg border border-gray-200" alt="Cornerstone Network"></div></div>';
+                    }
+
+                    if (data.key_genes && data.key_genes.length > 0) {
+                        html += '<h6 class="font-semibold mt-4 mb-3 text-gray-800">关键基因</h6>';
+                        html += '<div class="overflow-x-auto"><table class="min-w-full text-sm">';
+                        html += '<thead class="bg-green-100"><tr>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">基因</th>';
+                        if (data.key_genes[0].mcode_score !== undefined) {
+                            html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">MCODE分数</th>';
+                            html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">簇大小</th>';
+                            html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">簇排名</th>';
+                        }
+                        if (data.key_genes[0].importance_score !== undefined) {
+                            html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">重要性分数</th>';
+                            html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">AI排名</th>';
+                            if (data.key_genes[0].reason) {
+                                html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">原因</th>';
+                            }
+                        }
+                        html += '</tr></thead>';
+                        html += '<tbody class="divide-y">';
+                        data.key_genes.forEach(gene => {
+                            html += '<tr>';
+                            html += `<td class="px-3 py-2">${gene.gene}</td>`;
+                            if (gene.mcode_score !== undefined) {
+                                html += `<td class="px-3 py-2">${gene.mcode_score.toFixed(4)}</td>`;
+                                html += `<td class="px-3 py-2">${gene.cluster_size}</td>`;
+                                html += `<td class="px-3 py-2">${gene.cluster_rank}</td>`;
+                            }
+                            if (gene.importance_score !== undefined) {
+                                html += `<td class="px-3 py-2">${gene.importance_score}</td>`;
+                                html += `<td class="px-3 py-2">${gene.ai_rank}</td>`;
+                                if (gene.reason) {
+                                    html += `<td class="px-3 py-2">${gene.reason}</td>`;
+                                }
+                            }
+                            html += '</tr>';
+                        });
+                        html += '</tbody></table></div>';
+                    }
+
+                    if (data.interactions && data.interactions.length > 0) {
+                        html += '<h6 class="font-semibold mt-4 mb-3 text-gray-800">AI预测的蛋白质相互作用</h6>';
+                        html += '<div class="overflow-x-auto"><table class="min-w-full text-sm">';
+                        html += '<thead class="bg-purple-100"><tr>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">基因1</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">基因2</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">相互作用类型</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">置信度</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">作用机制</th>';
+                        html += '</tr></thead>';
+                        html += '<tbody class="divide-y">';
+                        data.interactions.forEach(interaction => {
+                            html += '<tr>';
+                            html += `<td class="px-3 py-2">${interaction.gene1}</td>`;
+                            html += `<td class="px-3 py-2">${interaction.gene2}</td>`;
+                            html += `<td class="px-3 py-2">${interaction.interaction_type || '-'}</td>`;
+                            html += `<td class="px-3 py-2">${interaction.confidence || '-'}</td>`;
+                            html += `<td class="px-3 py-2">${interaction.mechanism || '-'}</td>`;
+                            html += '</tr>';
+                        });
+                        html += '</tbody></table></div>';
+                    }
+
+                    if (data.keygene_clusters && data.keygene_clusters.length > 0) {
+                        html += '<h6 class="font-semibold mt-4 mb-3 text-gray-800">核心基因簇分析（KeyGene Top 10）</h6>';
+                        html += '<div class="overflow-x-auto"><table class="min-w-full text-sm">';
+                        html += '<thead class="bg-orange-100"><tr>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">序号</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">核心基因</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">分数</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">节点数</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">密度</th>';
+                        html += '</tr></thead>';
+                        html += '<tbody class="divide-y">';
+                        data.keygene_clusters.forEach((cluster, index) => {
+                            html += '<tr>';
+                            html += `<td class="px-3 py-2">${index + 1}</td>`;
+                            html += `<td class="px-3 py-2">${cluster.genes ? cluster.genes.join(', ') : ''}</td>`;
+                            html += `<td class="px-3 py-2">${cluster.score ? cluster.score.toFixed(4) : '-'}</td>`;
+                            html += `<td class="px-3 py-2">${cluster.size || '-'}</td>`;
+                            html += `<td class="px-3 py-2">${cluster.density ? cluster.density.toFixed(4) : '-'}</td>`;
+                            html += '</tr>';
+                        });
+                        html += '</tbody></table></div>';
+                    }
+
+                    if (data.key_compounds && data.key_compounds.length > 0) {
+                        html += '<h6 class="font-semibold mt-4 mb-3 text-gray-800">关键化合物（核心化合物）</h6>';
+                        html += '<div class="overflow-x-auto"><table class="min-w-full text-sm">';
+                        html += '<thead class="bg-red-100"><tr>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">化合物</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">综合得分</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">度中心性(DC)</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">介数中心性(BC)</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">紧密度中心性(CC)</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">特征向量中心性(EC)</th>';
+                        html += '</tr></thead>';
+                        html += '<tbody class="divide-y">';
+                        data.key_compounds.forEach(compound => {
+                            html += '<tr>';
+                            html += `<td class="px-3 py-2">${compound.compound || '-'}</td>`;
+                            html += `<td class="px-3 py-2">${compound.composite_score ? compound.composite_score.toFixed(4) : '-'}</td>`;
+                            html += `<td class="px-3 py-2">${compound.degree_centrality ? compound.degree_centrality.toFixed(4) : '-'}</td>`;
+                            html += `<td class="px-3 py-2">${compound.betweenness_centrality ? compound.betweenness_centrality.toFixed(4) : '-'}</td>`;
+                            html += `<td class="px-3 py-2">${compound.closeness_centrality ? compound.closeness_centrality.toFixed(4) : '-'}</td>`;
+                            html += `<td class="px-3 py-2">${compound.eigenvector_centrality ? compound.eigenvector_centrality.toFixed(4) : '-'}</td>`;
+                            html += '</tr>';
+                        });
+                        html += '</tbody></table></div>';
+                    }
+
+                    if (data.high_performance_compounds && data.high_performance_compounds.length > 0) {
+                        html += '<h6 class="font-semibold mt-4 mb-3 text-gray-800">高性能化合物（多项指标前20%）</h6>';
+                        html += '<div class="overflow-x-auto"><table class="min-w-full text-sm">';
+                        html += '<thead class="bg-purple-100"><tr>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">化合物</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">综合得分</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">度中心性(DC)</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">介数中心性(BC)</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">紧密度中心性(CC)</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">特征向量中心性(EC)</th>';
+                        html += '</tr></thead>';
+                        html += '<tbody class="divide-y">';
+                        data.high_performance_compounds.forEach(compound => {
+                            html += '<tr>';
+                            html += `<td class="px-3 py-2">${compound.compound || '-'}</td>`;
+                            html += `<td class="px-3 py-2">${compound.composite_score ? compound.composite_score.toFixed(4) : '-'}</td>`;
+                            html += `<td class="px-3 py-2">${compound.degree_centrality ? compound.degree_centrality.toFixed(4) : '-'}</td>`;
+                            html += `<td class="px-3 py-2">${compound.betweenness_centrality ? compound.betweenness_centrality.toFixed(4) : '-'}</td>`;
+                            html += `<td class="px-3 py-2">${compound.closeness_centrality ? compound.closeness_centrality.toFixed(4) : '-'}</td>`;
+                            html += `<td class="px-3 py-2">${compound.eigenvector_centrality ? compound.eigenvector_centrality.toFixed(4) : '-'}</td>`;
+                            html += '</tr>';
+                        });
+                        html += '</tbody></table></div>';
+                    }
+
+                    if (data.corestone_compounds && data.corestone_compounds.length > 0) {
+                        html += '<h6 class="font-semibold mt-4 mb-3 text-gray-800">基石化合物分析（Corestone Compounds）</h6>';
+                        html += '<div class="overflow-x-auto"><table class="min-w-full text-sm">';
+                        html += '<thead class="bg-indigo-100"><tr>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">化合物</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">基石度排名</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">基因排名</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">基因计数</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">丰度排名</th>';
+                        html += '<th class="px-3 py-2 text-left text-xs uppercase tracking-wider">丰度值</th>';
+                        html += '</tr></thead>';
+                        html += '<tbody class="divide-y">';
+                        data.corestone_compounds.forEach(compound => {
+                            html += '<tr>';
+                            html += `<td class="px-3 py-2">${compound.compound || '-'}</td>`;
+                            html += `<td class="px-3 py-2">${compound.corestone_rank ? compound.corestone_rank.toFixed(2) : '-'}</td>`;
+                            html += `<td class="px-3 py-2">${compound.gene_rank || '-'}</td>`;
+                            html += `<td class="px-3 py-2">${compound.gene_count || '-'}</td>`;
+                            html += `<td class="px-3 py-2">${compound.abundance_rank || '-'}</td>`;
+                            html += `<td class="px-3 py-2">${compound.abundance || '-'}</td>`;
+                            html += '</tr>';
+                        });
+                        html += '</tbody></table></div>';
+                    }
+
+                    if (data.ai_gene_selection) {
+                        html += '<h6 class="font-semibold mt-4 mb-3 text-gray-800">AI基因选择摘要</h6>';
+                        html += `<div class="whitespace-pre-wrap bg-blue-50 p-4 rounded-xl border border-blue-200">${data.ai_gene_selection}</div>`;
+                    }
+
+                    if (data.ai_interaction_prediction) {
+                        html += '<h6 class="font-semibold mt-4 mb-3 text-gray-800">AI相互作用预测摘要</h6>';
+                        html += `<div class="whitespace-pre-wrap bg-blue-50 p-4 rounded-xl border border-blue-200">${data.ai_interaction_prediction}</div>`;
+                    }
+
+                    html += '<div class="flex flex-wrap gap-3 mt-4">';
+                    if (data.key_genes_csv) {
+                        const csvFilename = data.key_genes_csv.split('/').pop();
+                        html += `<a href="/network-image/${csvFilename}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-6 rounded-xl transition-all inline-block" download>下载关键基因CSV</a>`;
+                    }
+                    if (data.compound_centrality_csv) {
+                        const centralityCsvFilename = data.compound_centrality_csv.split('/').pop();
+                        html += `<a href="/network-image/${centralityCsvFilename}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-xl transition-all inline-block" download>下载化合物中心性分析CSV</a>`;
+                    }
+                    if (data.cornerstone_compounds_csv) {
+                        const cornerstoneCsvFilename = data.cornerstone_compounds_csv.split('/').pop();
+                        html += `<a href="/network-image/${cornerstoneCsvFilename}" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-xl transition-all inline-block" download>下载关键化合物CSV</a>`;
+                    }
+                    html += '</div>';
+
+                    html = '<div class="text-green-600 bg-green-50 rounded-lg p-4 mb-4">分析完成！</div>' + html;
+                    resultContent.innerHTML = html;
+                } else {
+                    resultContent.innerHTML = '<div class="text-red-600 bg-red-50 rounded-lg p-4">' + data.error + '</div>';
+                }
+            })
+            .catch(error => {
+                button.disabled = false;
+                button.textContent = '运行网络分析';
+                resultContent.innerHTML = '<div class="error-message">Error: ' + error.message + '</div>';
+            });
+        });
+
+        document.getElementById('fileInput').addEventListener('change', function() {
+            const files = this.files;
+            if (files.length > 0) {
+                loadTissueTypes(files);
+            }
+        });
+    </script>
+
+</body>
+</html>
